@@ -95,6 +95,10 @@ export default {
       this.$refs.register.dialogFormVisible = true;
     }
   },
+
+  // mounted() {
+  //   alert('')
+  // },
  
 };
 </script>
