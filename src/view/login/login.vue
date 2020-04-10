@@ -53,9 +53,10 @@
 </template>
 
 <script>
-import register from "./register.vue";
-import { toLogin } from "@/api/login.js";
-import { saveToken } from "@/utils/token.js"
+import register from "./register.vue"
+import { toLogin } from "@/api/login.js"
+import { saveToken,getToken } from "@/utils/token.js"
+
 
 export default {
   name: "login",
@@ -127,6 +128,7 @@ export default {
             console.log("登陆信息",res);
             // 保存token
             saveToken( res.data.token );
+            this.$router.push("/home");
           }); 
         }
       });
@@ -138,7 +140,12 @@ export default {
     codeClick(){
       this.code = process.env.VUE_APP_URL + "/captcha?type=login&t=" + Date.now();
     }
-  }
+  },
+  created() {
+    if (getToken()) {
+      this.$router.push("/home");
+    }
+  },
 
   // mounted() {
   //   alert('')

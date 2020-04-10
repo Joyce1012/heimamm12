@@ -1,5 +1,7 @@
 import axios from "axios"
 import { Message } from 'element-ui';
+import { getToken, removeToken } from "./token.js"
+import router from "@/router/router.js"
 
 const instance = axios.create({
     baseURL: process.env.VUE_APP_URL,
@@ -8,9 +10,11 @@ const instance = axios.create({
 
  // 添加请求拦截器
  instance.interceptors.request.use(function (config) {
+     if(getToken()) {
+         config.headers.token = getToken()
+     }
     // 在发送请求之前做些什么
     //config所有请求的相关信息
-    window.console.log("拦截的数据", config)
     return config;
 }, function (error) {
     // 对请求错误做些什么
@@ -25,6 +29,13 @@ instance.interceptors.response.use(function (response) {
     if (response.data.code == 200) {
         // 因为返回数据里面axios帮我们额外的包了一层data但实际我们基本不用，所以我们把它干掉
         return response.data;
+    } else if (response.data.code == 206) {
+        Message.error(response.data.message)
+        // 跳转至登录页
+        router.push("/")
+        // 清理token
+        removeToken()
+        return Promise.reject("error");
     } else {
         // 提示用户错误
         // 出错了我们还有必要返回数据出去吗？
