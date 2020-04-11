@@ -14,7 +14,10 @@ const router = new VueRouter({
     routes: [
         {
             path: "/",
-            component: login
+            component: login,
+            meta: {
+                title:"登录"
+            }
         },
         {
             path: "/home",
@@ -23,23 +26,38 @@ const router = new VueRouter({
             children: [
                 {
                     path: "chart",
-                    component: chart
+                    component: chart,
+                    meta: {
+                        title:"数据概览"
+                    }
                 },
                 {
                     path: "userList",
-                    component: userList
+                    component: userList,
+                    meta: {
+                        title:"用户列表"
+                    }
                 },
                 {
                     path: "business",
-                    component: business
+                    component: business,
+                    meta: {
+                        title:"企业列表"
+                    }
                 },
                 {
                     path: "subject",
-                    component: subject
+                    component: subject,
+                    meta: {
+                        title:"学科列表"
+                    }
                 },
                 {
                     path: "question",
-                    component: question
+                    component: question,
+                    meta: {
+                        title:"题库列表"
+                    }
                 },
             ]
         }
@@ -56,6 +74,7 @@ router.beforeEach((to, from, next)=>{
 // 进入后守卫
 router.afterEach((to, from)=>{
     NProgress.done()
+    document.title = to.meta.title;
     console.log(from);
 })
 export default router;
