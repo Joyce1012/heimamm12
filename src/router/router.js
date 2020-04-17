@@ -16,7 +16,9 @@ const router = new VueRouter({
             path: "/",
             component: login,
             meta: {
-                title:"登录"
+                title:"登录",
+                rules: ["超级管理员","管理员","老师","学生"]
+                
             }
         },
         {
@@ -28,35 +30,45 @@ const router = new VueRouter({
                     path: "chart",
                     component: chart,
                     meta: {
-                        title:"数据概览"
+                        title:"数据概览",
+                        rules: ["超级管理员","管理员","老师"],
+                        icon: "el-icon-pie-chart"
                     }
                 },
                 {
                     path: "userList",
                     component: userList,
                     meta: {
-                        title:"用户列表"
+                        title:"用户列表",
+                        rules: ["超级管理员","管理员"],
+                        icon: "el-icon-user"
                     }
                 },
                 {
                     path: "business",
                     component: business,
                     meta: {
-                        title:"企业列表"
+                        title:"企业列表",
+                        rules: ["超级管理员","管理员","老师"],
+                        icon: "el-icon-office-building"
                     }
                 },
                 {
                     path: "subject",
                     component: subject,
                     meta: {
-                        title:"学科列表"
+                        title:"学科列表",
+                        rules: ["超级管理员","管理员","老师","学生"],
+                        icon: "el-icon-notebook-2"
                     }
                 },
                 {
                     path: "question",
                     component: question,
                     meta: {
-                        title:"题库列表"
+                        title:"题库列表",
+                        rules: ["超级管理员","管理员","老师"],
+                        icon: "el-icon-edit-outline"
                     }
                 },
             ]
@@ -66,10 +78,20 @@ const router = new VueRouter({
 
 import NProgress from "nprogress"
 import 'nprogress/nprogress.css'
+import store from "@/store/index.js"
+import { Message } from 'element-ui';
+import { removeToken } from "@/utils/token.js"
 //导航守卫，进入前守卫
 router.beforeEach((to, from, next)=>{
     NProgress.start()
-    next()
+    if (to.meta.rules.includes(store.state.role)) {
+        next()
+    } else {
+        Message.warning("您无权访问该页面！")
+        removeToken();
+        next("/")
+    }
+    
 })
 // 进入后守卫
 router.afterEach((to, from)=>{

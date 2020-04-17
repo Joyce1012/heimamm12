@@ -1,7 +1,7 @@
 <template>
   <div class="userList">
-    <el-card>
-      <el-form :model="form" :inline="true" ref="form">
+    <el-card class="header">
+      <el-form :model="form" :inline="true" class="form">
         <el-form-item label="用户名称" prop="username">
           <el-input class="setWidth" v-model="form.username"></el-input>
         </el-form-item>
@@ -10,14 +10,18 @@
         </el-form-item>
         <el-form-item label="角色" prop="role_id">
           <el-select class="setWidth" v-model="form.role_id">
-            <el-option label="启用" value="1"></el-option>
-            <el-option label="禁用" value="0"></el-option>
+            <el-option
+              v-for="(value,key,index) in $store.state.roleObj"
+              :key="index"
+              :label="value"
+              :value="key"
+            ></el-option>
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" >搜索</el-button>
-          <el-button >清除</el-button>
-          <el-button type="primary" >+新增用户</el-button>
+          <el-button type="primary"  @click="search" >搜索</el-button>
+          <el-button @click="reset">清除</el-button>
+          <el-button type="primary" @click="add">+新增用户</el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -32,22 +36,22 @@
         <el-table-column label="用户名" width="150px" prop="username"></el-table-column>
         <el-table-column label="电话" prop="phone"></el-table-column>
         <el-table-column label="邮箱" prop="email"></el-table-column>
-        <el-table-column label="角色" prop="role_id"></el-table-column>
+        <el-table-column label="角色" prop="role"></el-table-column>
         <el-table-column label="备注" prop="remark"></el-table-column>
         <el-table-column label="状态" width="100px" prop="status">
           <template slot-scope="scope">
-            <div :class="{red:scope.row.status==0}">{{scope.row.status==1?'启用':'禁用'}}</div>
+            <div @click="setStatus(scope.row.id)" :class="{red:scope.row.status==0}">{{scope.row.status==1?'启用':'禁用'}}</div>
           </template>
         </el-table-column>
         <el-table-column label="操作" width="280px">
           <template slot-scope="scope">
-            <el-button >编辑</el-button>
+            <el-button @click="edit(scope.row)">编辑</el-button>
             <el-button
               plain
               :type="scope.row.status==0?'success':'info'"
               @click="setStatus(scope.row.id)"
             >{{scope.row.status==0?'启用':'禁用'}}</el-button>
-            <el-button >删除</el-button>
+            <el-button @click="del(scope.row.id)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -64,24 +68,26 @@
         ></el-pagination>
       </div>
     </el-card>
-    <!-- <addBusiness></addBusiness> -->
+    <addUserList ref="addUserList" :mode="mode" :editData="editData"></addUserList>
   </div>
 </template>
 
 <script>
-// import addBusiness from "./addBusiness.vue";
+import addUserList from "./addUserList.vue";
 import {
   getUserListDate,
-  // delBusinessDate,
-  // setBusinessStatus
-} from "@/api/userList.js";
+  delUserData,
+  setUserStatus
+} from "@/api/user.js";
+
 export default {
-  // components: {
-  //   addBusiness
-  // },
+  components: {
+    addUserList
+  },
   data() {
     return {
-      // modeFather:"add",
+      mode:"add",
+      editData: "editData",
       form: {
         username: "",
         email: "",
@@ -128,48 +134,50 @@ export default {
       this.getData();
       console.log(this.form);
     },
-    // reset() {
-    //   this.$refs.form.resetFields();
-    //   this.search();
-    // },
-    // add() {
-    //   this.modeFather = "add";
-    //   this.$refs.addBusiness.form = {
-    //     eid: "",
-    //     name: "",
-    //     short_name: "",
-    //     intro: "",
-    //     remark: ""
-    //   }
-    //   this.$refs.addBusiness.dialogVisible = true;
-    // },
-    // del(id) {
-    //   this.$confirm("你确定要删除该条信息吗？", "友情提示", {
-    //     confirmButtonText: "确定删除",
-    //     cancelButtonText: "取消操作",
-    //     type: "warning"
-    //   }).then(() => {
+    reset() {
+      this.$refs.form.resetFields();
+      this.search();
+    },
+    add() {
+      this.mode = "add";
+      this.$refs.addUserList.form = {
+        username: "",
+        phone: "",
+        email: "",
+        role_id: "",
+        remark: "",
+        status: ""
+      };
+      this.$refs.addUserList.dialogVisible = true;
+    },
+    del(id) {
+      this.$confirm("你确定要删除该条信息吗？", "友情提示", {
+        confirmButtonText: "确定删除",
+        cancelButtonText: "取消操作",
+        type: "warning"
+      }).then(() => {
         // 确定删除调用接口
-    //     delBusinessDate({ id }).then(() => {
-    //       this.$message.success("删除成功");
-    //       this.search();
-    //     });
-    //   }).catch(()=>{
+        delUserData({ id }).then(() => {
+          this.$message.success("删除成功");
+          this.search();
+        });
+      }).catch(()=>{
 
-    //   });
-    // },
-    // setStatus(id) {
-    //   setBusinessStatus({ id }).then(() => {
-    //     this.$message.success("状态修改成功");
-    //     this.search();
-    //   });
-    // },
-    // edit(row){
-    //   this.modeFather = "edit";
-    //   this.$refs.addBusiness.form = JSON.parse(JSON.stringify(row));
-    //   this.$refs.addBusiness.dialogVisible = true;
-    //   console.log(row);
-    // }
+      });
+    },
+    setStatus(id) {
+      setUserStatus({ id }).then(() => {
+        this.$message.success("状态修改成功");
+        this.search();
+      });
+    },
+    edit(row){
+      this.mode = "edit";
+      // this.editData = row;
+      this.$refs.addUserList.form = JSON.parse(JSON.stringify(row));
+      this.$refs.addUserList.dialogVisible = true;
+      console.log(row);
+    }
   }
 };
 </script>

@@ -20,7 +20,7 @@
         <el-form-item>
           <el-button type="primary" @click="search" >搜索</el-button>
           <el-button @click="reset">清除</el-button>
-          <el-button type="primary" @click="add">+新增学科</el-button>
+          <el-button type="primary" @click="add" v-if="$store.state.role!='学生'">+新增学科</el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -38,11 +38,11 @@
         <el-table-column label="状态" width="100px">
           <template slot-scope="scope">{{scope.row.status==1?'启用':'禁用'}}</template>
         </el-table-column>
-        <el-table-column label="操作" width="270px">
+        <el-table-column label="操作" width="270px" v-if="$store.state.role!='学生'">
           <template slot-scope="scope">
             <el-button @click="edit(scope.row)">编辑</el-button>
             <el-button @click="setStatus(scope.row.id)">{{scope.row.status==0?'启用':'禁用'}}</el-button>
-            <el-button @click="del(scope.row.id)">删除</el-button>
+            <el-button @click="del(scope.row.id)" v-if="$store.state.role.includes('管理员')">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
