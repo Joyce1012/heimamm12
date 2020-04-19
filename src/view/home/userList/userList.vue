@@ -73,7 +73,7 @@
 </template>
 
 <script>
-import addUserList from "./addUserList.vue";
+import addUserList from '@/view/home/userList/addUserlist.vue';
 import {
   getUserListDate,
   delUserData,
